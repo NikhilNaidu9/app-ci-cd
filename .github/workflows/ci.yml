@@ -48,6 +48,24 @@ jobs:
       - uses: subosito/flutter-action@v1
         with:
           channel: "stable"
+      - run: mkdir ${{ github.workspace }}/build-apks
       - run: flutter pub get
       - run: flutter clean
       - run: flutter build appbundle
+      - uses: actions/upload-artifact@v2
+        with:
+          name: my-artifact
+          path: ${{ github.workspace }}/build-apks/
+
+  sign_apk:
+    name: Sign APK
+    needs: [build_appbundle]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: "12.x"
+      - run: mkdir ${{ github.workspace }}/keys
+      - run: keytool -genkey -v -keystore ${{ github.workspace }}/keys/my-release-key.keystore -alias apk-keys -keyalg RSA -keysize 2048 -validity 10000
+      - run: jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore ${{ github.workspace }}/keys/my-release-key.keystore ${{ github.workspace }}/build-apks/release.apk app
