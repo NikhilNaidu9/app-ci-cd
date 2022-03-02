@@ -55,7 +55,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: my-artifact
-          path: ${{ github.workspace }}/build-apks/
+          path: ${{ github.workspace }}/build-apks/release.apk
 
   sign_apk:
     name: Sign APK
